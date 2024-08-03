@@ -49,7 +49,7 @@ async function main() {
         // Subscribe to a topic
     })
     client.on("reconnect", () => {
-        loggerInit.info("reconnecting!")
+        loggerInit.info(`Try reconnect to ${mqttserver}`)
     })
     client.stream.on('error', (err) => {
         loggerInit.error('error')
@@ -61,6 +61,7 @@ async function main() {
 
     if (config.devices){
         config.devices.forEach((device) => {
+            device.loglevel = config.loglevel
             const deviceClassFile = `./modules/${device.type}`
             loggerInit.info(`Setup device ${device.id}, type: ${device.type}, class:'${deviceClassFile}.js'`)
             try {

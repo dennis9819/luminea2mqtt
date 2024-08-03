@@ -1,31 +1,14 @@
-const TuyaDevice = require('tuyapi');
-const log4js = require('log4js');
+/*
+*   Device class definition for Luminea NX-445
+*   https://www.luminea.info/Outdoor-WLAN-Steckdose-kompatibel-zu-Alexa-NX-4458-919.shtml
+*
+*   by Dennis Gunia (08/2024)
+*/
 
-class Lineplug {
-    constructor(deviceconfig, mqtt) {
-        const loggername = deviceconfig.id ? deviceconfig.id : "undef device"
-        this.logger = log4js.getLogger(loggername);
+const DeviceBase = require('../devicebase')
+class Lineplug extends DeviceBase {
 
-        if (!deviceconfig.id) {
-            this.logger.error("missing attribute 'id' in device config")
-            return
-        }
-        if (!deviceconfig.key) {
-            this.logger.error("missing attribute 'key' in device config")
-            return
-        }
-        if (!deviceconfig.topic) {
-            this.logger.error("missing attribute 'topic' in device config")
-            return
-        }
-
-        this.mqtt = mqtt
-        this.topicname = deviceconfig.topic
-        this.deviceid = deviceconfig.id
-        this.topic_get = `${deviceconfig.topic}/get`
-        this.topic_set = `${deviceconfig.topic}/set`
-        this.intervall = deviceconfig.refresh ? deviceconfig.refresh * 1000 : 10000
-
+    init() {
         this.lastdata = {
             voltage: 0,
             current: 0,
@@ -36,49 +19,27 @@ class Lineplug {
             countdown_1: 0,
             random_time: 0,
         }
-        try {
-            this.device = new TuyaDevice({
-                id: deviceconfig.id,
-                key: deviceconfig.key,
-                issueRefreshOnConnect: true,
-                ip: deviceconfig.ip,
-            })
-            this.device.find().then(el => {
-                this.device.connect().then(el => {
-                    this.logger.info(`Connected to tuya id: ${this.deviceid} @ ${this.topicname}`)
-                    this.startWatcher()
-                    this.mqtt.subscribe(this.topic_set, (err) => {
-                        if (err) {
-                            this.logger.error(`Cannot subscribe to ${this.topic_set}`)
-                        } else {
-                            this.logger.info(`Subscribed to ${this.topic_set}`)
-                        }
-                    });
-                }).catch(error => {
-                    this.logger.error(`Cannot connect to ${this.deviceid}`)
-                    this.logger.error(error.message)
-                });
-            })
-        } catch (error) {
-            this.logger.error(`Cannot connect to ${this.deviceid}`)
-            this.logger.error(error.message)
-        }
     }
 
     startWatcher() {
         // monitoring loop
-        this.timer = setInterval(() => this.device.refresh(), 10000)
+        this.timer = setInterval(() => {
+            this.device.refresh()
+        }, this.intervall_refresh)
         this.logger.info(`Started watcher for id: ${this.deviceid}`)
         this.device.on('data', data => {
+            this.logger.debug(`rx data: ${JSON.stringify(data)}`)
             this.processData(data)
         });
         this.device.on('dp-refresh', data => {
+            this.logger.debug(`rx dp-refresh: ${JSON.stringify(data)}`)
             this.processData(data)
         });
         // monitor queue
         this.mqtt.on('message', (topic, message) => {
             // message is Buffer
             let payload = message.toString()
+            this.logger.debug(`input ${topic}: ${payload}`)
 
             try {
                 const jsonpayload = JSON.parse(payload)
@@ -121,7 +82,7 @@ class Lineplug {
             changed = true
         }
         if (updatedValues.includes('9')) {
-            this.lastdata.countdown_1 = dps['9'] 
+            this.lastdata.countdown_1 = dps['9']
             changed = true
         }
         if (updatedValues.includes('41')) {
@@ -135,20 +96,19 @@ class Lineplug {
         if (updatedValues.includes('1')) {
             this.lastdata.status = dps['1']
             changed = true
-            this.mqtt.publish(this.topic_get, JSON.stringify({
+            const msg = {
                 value: this.lastdata.status
-            }))
+            }
+            this.mqtt.publish(this.topic_get, JSON.stringify(msg))
+            this.logger.debug(`publish ${this.topic_get}: ${JSON.stringify(msg)}`)
         }
         if (changed) {
             this.mqtt.publish(this.topicname, JSON.stringify(this.lastdata))
+            this.logger.debug(`publish ${this.topicname}: ${JSON.stringify(this.lastdata)}`)
+
         }
     }
 
-    disconnect() {
-        clearInterval(this.timer)
-        this.device.disconnect()
-        this.logger.info(`Disconnected for id: ${this.deviceid}`)
-    }
 }
 
 module.exports = Lineplug
