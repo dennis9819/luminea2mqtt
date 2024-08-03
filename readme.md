@@ -36,5 +36,7 @@ sudo -u luminea2mqtt node /opt/luminea2mqtt/bridge/src/index.js -c /opt/luminea2
 ```
 ### Install as systemd service
 ```
-
+sudo cp -p /opt/luminea2mqtt/bridge/luminea2mqtt.service /etc/systemd/system/luminea2mqtt.service
+sudo systemctl daemon-reload
+sudo systemctl start luminea2mqtt
 ```

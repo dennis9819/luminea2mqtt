@@ -1,0 +1,12 @@
+[Unit]
+Description=luminea2mqtt
+After=network.target
+
+[Service]
+Type=simple
+User=luminea2mqtt
+ExecStart=node /opt/luminea2mqtt/bridge/src/index.js -c /opt/luminea2mqtt/bridge/config.yaml
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
