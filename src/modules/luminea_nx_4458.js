@@ -57,6 +57,10 @@ class Lineplug extends DeviceBase {
         })
     }
 
+    stopWatcher(){
+        clearInterval(this.timer)
+    }
+
     processData(data) {
         if (!data.dps) {
             this.logger.warn(`Received unexpected data from device`)

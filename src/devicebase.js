@@ -37,7 +37,7 @@ class DeviceBase {
         this.logger.debug(`use topic (state)    : ${this.topic_state}`)
 
         this.intervall_refresh = deviceconfig.refresh ? deviceconfig.refresh * 1000 : 10000
-        this.reconnect_timout = deviceconfig.reconnect ? deviceconfig.reconnect * 1000  : 5000
+        this.reconnect_timout = deviceconfig.reconnect ? deviceconfig.reconnect * 1000 : 5000
 
         this.logger.debug(`refresh timer   (ms) : ${this.intervall_refresh}`)
         this.logger.debug(`reconnect timer (ms) : ${this.reconnect_timout}`)
@@ -53,6 +53,7 @@ class DeviceBase {
                 key: this.devicekey,
                 issueRefreshOnConnect: true,
             })
+            this.device.device.ip = undefined
             this.reconnect()
 
         } catch (error) {
@@ -63,7 +64,6 @@ class DeviceBase {
         this.device.on('connected', () => {
             this.connected = true
             this.logger.info(`Connected to tuya id: ${this.deviceid}, ip: ${this.device.device.ip}, prefix: ${this.topicname}`)
-            this.startWatcher()
             // subscribe to topic
             this.mqtt.subscribe(this.topic_set, (err) => {
                 if (err) {
@@ -74,10 +74,11 @@ class DeviceBase {
             });
             this.logger.debug(`publish ${this.totopic_statepic_get}: "online"`)
             this.mqtt.publish(this.topic_state, "online")
+            this.startWatcher()
         });
 
         this.device.on('disconnected', () => {
-            clearInterval(this.timer)
+            this.stopWatcher()
             this.logger.info(`Disconnected`)
             this.logger.debug(`publish ${this.topic_state}: "offline"`)
             this.mqtt.publish(this.topic_state, "offline")
@@ -86,9 +87,7 @@ class DeviceBase {
         });
 
         this.device.on('error', error => {
-            clearInterval(this.timer)
-            this.logger.debug(`publish ${this.topic_state}: "offline"`)
-            this.mqtt.publish(this.topic_state, "offline")
+            this.stopWatcher()
             setTimeout(() => this.reconnect(), this.reconnect_timout)
         });
     }
@@ -96,7 +95,9 @@ class DeviceBase {
     reconnect() {
         this.device.find().then(el => {
             if (el) {
-                this.device.connect()
+                this.device.connect().catch(el => {
+                    this.logger.debug("Reconnect failed: device offline")
+                })
             } else {
                 this.logger.debug("Reconnect failed: device offline")
                 setTimeout(() => this.reconnect(), this.reconnect_timout)
@@ -109,10 +110,10 @@ class DeviceBase {
 
     disconnect() {
         this.connected = false
-        clearInterval(this.timer)
+        this.stopWatcher()
         this.device.disconnect()
         this.logger.info(`Disconnected for id: ${this.deviceid}`)
-        this.reconnect = () => {}   // prevent reconnect on exit
+        this.reconnect = () => { }   // prevent reconnect on exit
     }
 
 }

@@ -8,5 +8,7 @@ devices:
   - id: "sqy709956ply4inkx6ac87"
     key: "xxxxxxxxxxxxxxxx"
     topic: "tuya/device1"
-    refresh: 30 #refresh intervall in s
+    refresh: 30
+    reconnect: 10
     type: luminea_nx_4458
+loglevel: "debug"
