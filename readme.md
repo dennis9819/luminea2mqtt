@@ -86,18 +86,42 @@ devices:
 ## Device classes
 Device classes are located in `./src/modules`. On intialization, each device in the config is initialized one by one. The js file, specified by `type` is loaded and a new instance of the exported class is created. 
 
-On shutdown, the `.disconnect()` function of the class is called.
-
-The constructor is called with the parameters:
-* `config`: containing the parameters for this device specified in the config file
-* `mqtt`: containing a reference to the mqtt client object
-
-Example:
-```
-class Lineplug {
-    constructor(deviceconfig, mqtt) {
-        ...
-```
 
 ### Creating your own devices
-You can create your own devices in `./src/modules`. You can use `luminea_nx_4458.js`as an example. Make sure you define the constructor as described above and define a disconnect function. The rest is up to you!
+You can create your own devices in `./src/modules`. You can use `luminea_nx_4458.js`as an example. Your class should extend `DeviceBase`: 
+```
+class Lineplug extends DeviceBase {
+
+    init() {
+        
+    }
+
+    startWatcher() {
+        
+    }
+
+    stopWatcher() {
+        
+    }
+
+
+}
+```
+These functions must be implementd:
+* `init` is called on creation. You can setup variables here
+* `startWatcher` is called after the connection is established
+* `stopWatcher` is called after disconnect (stop timers, unsubscribe mqtt,...)
+
+These variables are available:
+* `this.mqtt` reference to the mqtt client
+* `this.topicname` String: topic prefix
+* `this.topic_get` String: topic get
+* `this.topic_set` String: topic set
+* `this.topic_state` String: topic state
+* `this.deviceid` String: device id
+* `this.intervall_refresh` Number: refresh intervall (ms)
+* `this.reconnect_timout` Number: reconnect intervall (ms)
+* `this.lastdata` Object: buffer for last state
+* `this.logger` reference to log4js logger
+
+
