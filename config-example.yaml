@@ -1,0 +1,10 @@
+mqtt:
+  host: "127.0.0.1"
+  port: 1883
+  username: "username"
+  password: "password"
+lineaplug:
+  - id: "sqy709956ply4inkx6ac87"
+    key: "xxxxxxxxxxxxxxxx"
+    topic: "tuya/device1"
+    refresh: 30 #refresh intervall in s

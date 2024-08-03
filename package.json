@@ -1,0 +1,17 @@
+{
+  "name": "luminea2mqtt",
+  "version": "1.0.0",
+  "description": "Luminea to mqtt bridge",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Dennis Gunia",
+  "license": "ISC",
+  "dependencies": {
+    "log4js": "^6.9.1",
+    "mqtt": "^5.9.1",
+    "tuyapi": "github:codetheweb/tuyapi",
+    "yaml": "^2.5.0"
+  }
+}
