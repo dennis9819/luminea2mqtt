@@ -3,8 +3,10 @@ mqtt:
   port: 1883
   username: "username"
   password: "password"
-lineaplug:
+  clientid: "test"
+devices:
   - id: "sqy709956ply4inkx6ac87"
     key: "xxxxxxxxxxxxxxxx"
     topic: "tuya/device1"
     refresh: 30 #refresh intervall in s
+    type: luminea_nx_4458

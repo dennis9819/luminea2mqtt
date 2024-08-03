@@ -38,7 +38,6 @@ class Lineplug {
         }
         try {
             this.device = new TuyaDevice({
-                //ip: "10.110.0.126",
                 id: deviceconfig.id,
                 key: deviceconfig.key,
                 issueRefreshOnConnect: true,
@@ -79,7 +78,6 @@ class Lineplug {
         // monitor queue
         this.mqtt.on('message', (topic, message) => {
             // message is Buffer
-            //if (topic == this.topicname){
             let payload = message.toString()
 
             try {
@@ -95,17 +93,14 @@ class Lineplug {
                 this.logger.trace(payload)
                 this.logger.trace(error)
             }
-            // }
-
         })
     }
 
     processData(data) {
-        //console.log(data)
         if (!data.dps) {
+            this.logger.warn(`Received unexpected data from device`)
             return
         }
-
         const dps = data.dps
         const updatedValues = Object.keys(dps)
         let changed = false
@@ -125,7 +120,6 @@ class Lineplug {
             this.lastdata.power = dps['17'] / 100
             changed = true
         }
-
         if (updatedValues.includes('9')) {
             this.lastdata.countdown_1 = dps['9'] 
             changed = true
@@ -138,7 +132,6 @@ class Lineplug {
             this.lastdata.random_time = dps['42']
             changed = true
         }
-
         if (updatedValues.includes('1')) {
             this.lastdata.status = dps['1']
             changed = true
@@ -149,7 +142,6 @@ class Lineplug {
         if (changed) {
             this.mqtt.publish(this.topicname, JSON.stringify(this.lastdata))
         }
-
     }
 
     disconnect() {

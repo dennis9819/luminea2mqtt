@@ -17,13 +17,20 @@ async function main() {
     const mqtt = require("mqtt");
     const YAML = require('yaml')
     const fs = require('fs')
-    const Lineplug = require('./lineaplug')
+    
     loggerInit.info("Read configfile")
 
     const options = program.opts();
     loggerInit.info(`User config from ${options.config}`)
-    const file = fs.readFileSync(options.config, 'utf8')
-    const config = YAML.parse(file)
+    let config = {}
+    try {
+        const file = fs.readFileSync(options.config, 'utf8')
+        config = YAML.parse(file)
+    } catch (error) {
+        loggerInit.error(`error reading config: ${error.message}`)
+        process.exit(10)
+    }
+
 
 
     const mqttserver = `mqtt://${config.mqtt.host}:${config.mqtt.port}`
@@ -33,9 +40,10 @@ async function main() {
         // Authentication
         username: config.mqtt.username,
         password: config.mqtt.password,
-        clientId: "test",
+        clientId: config.mqtt.clientid,
         debug: true,
     });
+    loggerInit.info(`Connect to ${mqttserver}, user: ${config.mqtt.username}, clientid: ${config.mqtt.clientid}`)
     client.on('connect', function () {
         loggerInit.info(`Connected to ${mqttserver}`)
         // Subscribe to a topic
@@ -44,20 +52,31 @@ async function main() {
         loggerInit.info("reconnecting!")
     })
     client.stream.on('error', (err) => {
-        loggerInit.error('error', err);
+        loggerInit.error('error')
+        loggerInit.error(err)
         client.end()
     });
 
     let devices = []
 
-    config.lineaplug.forEach((device) => {
-        loggerInit.info(`Setup device ${device.id} Type: Lineplug`)
-        const newdev = new Lineplug(device, client)
-        devices.push(newdev)
-
-    })
-
-
+    if (config.devices){
+        config.devices.forEach((device) => {
+            const deviceClassFile = `./modules/${device.type}`
+            loggerInit.info(`Setup device ${device.id}, type: ${device.type}, class:'${deviceClassFile}.js'`)
+            try {
+                const DeviceClass = require(deviceClassFile)
+                const newdev = new DeviceClass(device, client)
+                devices.push(newdev)
+            } catch (error) {
+                loggerInit.error(`Error initializing device class ${deviceClassFile}`);
+                loggerInit.error(error.message);
+            }
+            
+        })
+    }else{
+        loggerInit.error(`Missing 'devices' in config.`)
+        process.exit(10)
+    }
 
     process.on('SIGINT', () => {
         for (let device of devices) {
