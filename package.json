@@ -9,6 +9,7 @@
   "author": "Dennis Gunia",
   "license": "ISC",
   "dependencies": {
+    "commander": "^12.1.0",
     "log4js": "^6.9.1",
     "mqtt": "^5.9.1",
     "tuyapi": "github:codetheweb/tuyapi",
