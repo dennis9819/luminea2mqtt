@@ -38,26 +38,27 @@ class Lineplug extends DeviceBase {
         // monitor queue
         this.mqtt.on('message', (topic, message) => {
             // message is Buffer
-            let payload = message.toString()
-            this.logger.debug(`input ${topic}: ${payload}`)
-
-            try {
-                const jsonpayload = JSON.parse(payload)
-                if (jsonpayload.value != undefined) {
-                    this.logger.info(`Change status to ${jsonpayload.value}`)
-                    this.device.set({ set: jsonpayload.value }).then(el => {
-                        this.device.refresh()
-                    })
+            if (topic == this.topic_set) {  // verify that the topic is correct
+                let payload = message.toString()
+                this.logger.debug(`input ${topic}: ${payload}`)
+                try {
+                    const jsonpayload = JSON.parse(payload)
+                    if (jsonpayload.value != undefined) {
+                        this.logger.info(`Change status to ${jsonpayload.value}`)
+                        this.device.set({ set: jsonpayload.value }).then(el => {
+                            this.device.refresh()
+                        })
+                    }
+                } catch (error) {
+                    this.logger.warn(`Error parsing malformatted JSON message via mqtt`)
+                    this.logger.trace(payload)
+                    this.logger.trace(error)
                 }
-            } catch (error) {
-                this.logger.warn(`Error parsing malformatted JSON message via mqtt`)
-                this.logger.trace(payload)
-                this.logger.trace(error)
             }
         })
     }
 
-    stopWatcher(){
+    stopWatcher() {
         clearInterval(this.timer)
     }
 
