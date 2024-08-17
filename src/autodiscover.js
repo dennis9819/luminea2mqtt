@@ -2,7 +2,7 @@ const log4js = require('log4js');
 const logger = log4js.getLogger("autodiscover");
 const configldr = require('./config')
 
-logger.level = 'debug';
+logger.level = 'info';
 let discover_mqtt = undefined
 
 module.exports.setup = async (mqtt) => {
