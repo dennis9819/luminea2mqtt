@@ -1,0 +1,128 @@
+{
+    "1": {
+        "code": "switch_1",
+        "id": "1",
+        "mode": "rw",
+        "name": "开关1",
+        "property": "{\"type\":\"bool\"}",
+        "schemaType": "bool",
+        "type": "obj"
+    },
+    "17": {
+        "code": "add_ele",
+        "id": "17",
+        "mode": "rw",
+        "name": "增加电量",
+        "property": "{\"max\":50000,\"min\":0,\"scale\":3,\"step\":100,\"type\":\"value\",\"unit\":\"kwh\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "18": {
+        "code": "cur_current",
+        "id": "18",
+        "mode": "ro",
+        "name": "当前电流",
+        "property": "{\"max\":30000,\"min\":0,\"scale\":0,\"step\":1,\"type\":\"value\",\"unit\":\"mA\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "19": {
+        "code": "cur_power",
+        "id": "19",
+        "mode": "ro",
+        "name": "当前功率",
+        "property": "{\"max\":50000,\"min\":0,\"scale\":1,\"step\":1,\"type\":\"value\",\"unit\":\"W\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "20": {
+        "code": "cur_voltage",
+        "id": "20",
+        "mode": "ro",
+        "name": "当前电压",
+        "property": "{\"max\":5000,\"min\":0,\"scale\":1,\"step\":1,\"type\":\"value\",\"unit\":\"V\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "21": {
+        "code": "test_bit",
+        "id": "21",
+        "mode": "ro",
+        "name": "产测结果位",
+        "property": "{\"max\":5,\"min\":0,\"scale\":0,\"step\":1,\"type\":\"value\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "22": {
+        "code": "voltage_coe",
+        "id": "22",
+        "mode": "ro",
+        "name": "电压校准系数",
+        "property": "{\"max\":1000000,\"min\":0,\"scale\":0,\"step\":1,\"type\":\"value\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "23": {
+        "code": "electric_coe",
+        "id": "23",
+        "mode": "ro",
+        "name": "电流校准系数",
+        "property": "{\"max\":1000000,\"min\":0,\"scale\":0,\"step\":1,\"type\":\"value\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "24": {
+        "code": "power_coe",
+        "id": "24",
+        "mode": "ro",
+        "name": "功率校准系数",
+        "property": "{\"max\":1000000,\"min\":0,\"scale\":0,\"step\":1,\"type\":\"value\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "25": {
+        "code": "electricity_coe",
+        "id": "25",
+        "mode": "ro",
+        "name": "电量校准系数",
+        "property": "{\"max\":1000000,\"min\":0,\"scale\":0,\"step\":1,\"type\":\"value\"}",
+        "schemaType": "value",
+        "type": "obj"
+    },
+    "26": {
+        "code": "fault",
+        "id": "26",
+        "mode": "ro",
+        "name": "故障告警",
+        "property": "{\"label\":[\"ov_cr\",\"ov_vol\",\"ov_pwr\",\"ls_cr\",\"ls_vol\",\"ls_pow\"],\"maxlen\":6,\"type\":\"bitmap\"}",
+        "schemaType": "bitmap",
+        "type": "obj"
+    },
+    "41": {
+        "code": "cycle_time",
+        "id": "41",
+        "mode": "rw",
+        "name": "循环定时",
+        "property": "{\"maxlen\":255,\"type\":\"string\"}",
+        "schemaType": "string",
+        "type": "obj"
+    },
+    "42": {
+        "code": "random_time",
+        "id": "42",
+        "mode": "rw",
+        "name": "随机定时",
+        "property": "{\"maxlen\":255,\"type\":\"string\"}",
+        "schemaType": "string",
+        "type": "obj"
+    },
+    "9": {
+        "code": "countdown_1",
+        "id": "9",
+        "mode": "rw",
+        "name": "开关1倒计时",
+        "property": "{\"max\":86400,\"min\":0,\"scale\":0,\"step\":1,\"type\":\"value\",\"unit\":\"s\"}",
+        "schemaType": "value",
+        "type": "obj"
+    }
+}
