@@ -19,6 +19,52 @@ class Lineplug extends DeviceBase {
             countdown_1: 0,
             random_time: 0,
         }
+
+        this.deviceConfig = {
+            switch: {
+                switch: {
+                    component: "switch",
+                    command_topic: this.topic_set,
+                    state_topic: this.topicname,
+                    payload_on: "{\"value\": true}",
+                    payload_off: "{\"value\": false}",
+                    optimistic: false,
+                    device_class: "outlet",
+                    value_template: "{{ value_json.status }}",
+                    state_off: false,
+                    state_on: true,
+                    enabled_by_default: true
+                },
+            },
+            sensor: {
+                voltage: {
+                    state_topic: this.topicname,
+                    device_class: "voltage",
+                    state_class: "measurement",
+                    value_template: "{{ value_json.voltage }}",
+                    unit_of_measurement: "V",
+                    enabled_by_default: true
+                },
+                current: {
+                    state_topic: this.topicname,
+                    device_class: "current",
+                    state_class: "measurement",
+                    value_template: "{{ value_json.current }}",
+                    unit_of_measurement: "A",
+                    enabled_by_default: true
+                },
+                power: {
+                    state_topic: this.topicname,
+                    device_class: "power",
+                    state_class: "measurement",
+                    value_template: "{{ value_json.power }}",
+                    unit_of_measurement: "W",
+                    enabled_by_default: true
+                }
+            }
+
+        }
+        this.pushAutodiscover(this.deviceConfig)
     }
 
     startWatcher() {
@@ -57,7 +103,7 @@ class Lineplug extends DeviceBase {
         })
     }
 
-    stopWatcher(){
+    stopWatcher() {
         clearInterval(this.timer)
     }
 

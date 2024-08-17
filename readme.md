@@ -4,6 +4,12 @@ This should also work with almost all other tuya devices, provided therre is a f
 
 This bridge is mostly based on the work of: https://github.com/codetheweb/tuyapi
 
+## Features
+* Easy intigration of luminea (tuya) device into HomeAssistant
+* Auto reconnect to tuya device
+* Supports Homeassistant Auto-Discovery
+* Easily extendable
+
 ## Supported devices
 At the moment:
 * luminea nx-4458
@@ -66,20 +72,31 @@ mqtt:
   username: "username"
   password: "password"
   clientid: "test"
+  prefix: "luminea2mqtt"
 ```
 These values define the port and ip of the server, as well as the credentials for this client. All values must be specified. Make sure that the `clientid` is unique.
+The `prefix` is the prefix of all mqtt topics.
 
+### Autodiscover
+```
+autodiscover:
+  enabled: true
+  topic: homeassistant
+```
+This enables auto discovery for home assistant. (See https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery)
+* `enabled`: enables autodiscovery.
+* `topic`: topic prefix for discovery messages
 ### Device config
 ```
 devices:
   - id: "sqy709956ply4inkx6ac87"
     key: "xxxxxxxxxxxxxxxx"
-    topic: "tuya/device1"
+    friendlyname: "device1"
     refresh: 30 #refresh intervall in s
     type: luminea_nx_4458
 ```
 * `id` and `key`: Specify id an local key of tuya device. There are severeal tutorials avaliable online on how to get these keys. This depends on the app you have used to register your devices if you don't want to reset them. If you use iO.e, see `extractkeys.md` on how to get extract these values.
-* `topic`: base topic for mqtt. `/get` and `/set` topics are also used for turning the switch on or off.
+* `friendlyname`: The displayname of the device. Also sets the base topic for this device as following: `/{mqtt.prefix}/{friendlyname}` If this property is not set, friendlyname defaults to the `id`. `/get` and `/set` topics are also used for turning the switch on or off.
 * `refresh`: refresh intervall in s
 * `type`: name of device class. Class files are located in `./src/modules`
 
@@ -111,6 +128,9 @@ These functions must be implementd:
 * `init` is called on creation. You can setup variables here
 * `startWatcher` is called after the connection is established
 * `stopWatcher` is called after disconnect (stop timers, unsubscribe mqtt,...)
+
+These functions can be implemented:
+* `pushAutodiscover(deviceConfig)` is called to publish the device config
 
 These variables are available:
 * `this.mqtt` reference to the mqtt client

@@ -1,6 +1,8 @@
 
 const TuyaDevice = require('tuyapi');
 const log4js = require('log4js');
+const autodiscover = require('./autodiscover')
+const configldr = require('./config')
 
 class DeviceBase {
     constructor(deviceconfig, mqtt) {
@@ -17,19 +19,19 @@ class DeviceBase {
             this.logger.error("missing attribute 'key' in device config")
             return
         }
-        if (!deviceconfig.topic) {
-            this.logger.error("missing attribute 'topic' in device config")
-            return
-        }
         // define device vars   
-        this.mqtt = mqtt
-        this.topicname = deviceconfig.topic
-        this.deviceid = deviceconfig.id
-        this.devicekey = deviceconfig.key
+        this.deviceid = deviceconfig.id     // tuya device id
+        this.devicekey = deviceconfig.key   // tuya device key
 
-        this.topic_get = `${deviceconfig.topic}/get`
-        this.topic_set = `${deviceconfig.topic}/set`
-        this.topic_state = `${deviceconfig.topic}/state`
+        this.mqtt = mqtt                    // pointer to mqtt client
+        // name to be displayed. If not set, default to prefixed tuya client id
+        this.friendlyname = deviceconfig.friendlyname ? deviceconfig.friendlyname : `luminea2mqtt_${this.deviceid}`
+        // define queue names. Prefix is set globally. Prefer friendly name. If not set, use client id
+        this.queue_name = deviceconfig.friendlyname ? deviceconfig.friendlyname : this.deviceid
+        this.topicname = `${configldr.config.mqtt.prefix}/${this.queue_name}`
+        this.topic_get = `${configldr.config.mqtt.prefix}/${this.queue_name}/get`
+        this.topic_set = `${configldr.config.mqtt.prefix}/${this.queue_name}/set`
+        this.topic_state = `${configldr.config.mqtt.prefix}/${this.queue_name}/state`
 
         this.logger.debug(`use topic (all)      : ${this.topicname}`)
         this.logger.debug(`use topic (get)      : ${this.topic_get}`)
@@ -92,10 +94,17 @@ class DeviceBase {
         });
     }
 
+    pushAutodiscover(config){
+        if (configldr.config.autodiscover.enabled){
+            autodiscover.publishDevice(this.deviceid,this.friendlyname,config)
+        }
+    }
+
     reconnect() {
         this.device.find().then(el => {
             if (el) {
                 this.device.connect().catch(el => {
+                    console.log(this.device)
                     this.logger.debug("Reconnect failed: device offline")
                 })
             } else {

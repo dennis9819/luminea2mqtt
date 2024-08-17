@@ -3,9 +3,14 @@ const logger = log4js.getLogger();
 const loggerInit = log4js.getLogger("initializer");
 const { Command } = require('commander');
 const program = new Command();
+const configldr = require('./config')
+const autodiscover = require('./autodiscover')
+const mqtt = require("mqtt");
+const DeviceManager = require('./devicemanager')
 
 logger.level = 'info';
 loggerInit.level = 'info';
+
 
 program
     .name('luminea2mqtt')
@@ -14,39 +19,31 @@ program
     .parse(process.argv);
 
 async function main() {
-    const mqtt = require("mqtt");
-    const YAML = require('yaml')
-    const fs = require('fs')
-    
-    loggerInit.info("Read configfile")
-
     const options = program.opts();
     loggerInit.info(`User config from ${options.config}`)
-    let config = {}
-    try {
-        const file = fs.readFileSync(options.config, 'utf8')
-        config = YAML.parse(file)
-    } catch (error) {
-        loggerInit.error(`error reading config: ${error.message}`)
-        process.exit(10)
-    }
 
+    configldr.loadConfig(options.config)
 
-
-    const mqttserver = `mqtt://${config.mqtt.host}:${config.mqtt.port}`
+    let deviceManager = new DeviceManager()
+    
+    const mqttserver = `mqtt://${configldr.config.mqtt.host}:${configldr.config.mqtt.port}`
     let client = mqtt.connect(mqttserver, {
         // Clean session
         connectTimeout: 1000,
         // Authentication
-        username: config.mqtt.username,
-        password: config.mqtt.password,
-        clientId: config.mqtt.clientid,
+        username: configldr.config.mqtt.username,
+        password: configldr.config.mqtt.password,
+        clientId: configldr.config.mqtt.clientid,
         debug: true,
     });
-    loggerInit.info(`Connect to ${mqttserver}, user: ${config.mqtt.username}, clientid: ${config.mqtt.clientid}`)
+
+    loggerInit.info(`Connect to ${mqttserver}, user: ${configldr.config.mqtt.username}, clientid: ${configldr.config.mqtt.clientid}`)
+    autodiscover.setup(client)
+    deviceManager.setClient(client)
+
     client.on('connect', function () {
         loggerInit.info(`Connected to ${mqttserver}`)
-        // Subscribe to a topic
+        deviceManager.connect()
     })
     client.on("reconnect", () => {
         loggerInit.info(`Try reconnect to ${mqttserver}`)
@@ -57,32 +54,8 @@ async function main() {
         client.end()
     });
 
-    let devices = []
-
-    if (config.devices){
-        config.devices.forEach((device) => {
-            device.loglevel = config.loglevel
-            const deviceClassFile = `./modules/${device.type}`
-            loggerInit.info(`Setup device ${device.id}, type: ${device.type}, class:'${deviceClassFile}.js'`)
-            try {
-                const DeviceClass = require(deviceClassFile)
-                const newdev = new DeviceClass(device, client)
-                devices.push(newdev)
-            } catch (error) {
-                loggerInit.error(`Error initializing device class ${deviceClassFile}`);
-                loggerInit.error(error.message);
-            }
-            
-        })
-    }else{
-        loggerInit.error(`Missing 'devices' in config.`)
-        process.exit(10)
-    }
-
     process.on('SIGINT', () => {
-        for (let device of devices) {
-            device.disconnect()
-        }
+        deviceManager.disconnect()
         process.exit(2);
     });
 

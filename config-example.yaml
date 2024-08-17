@@ -4,10 +4,14 @@ mqtt:
   username: "username"
   password: "password"
   clientid: "test"
+  prefix: "luminea2mqtt"
+autodiscover:
+  enabled: true
+  topic: homeassistant
 devices:
   - id: "sqy709956ply4inkx6ac87"
     key: "xxxxxxxxxxxxxxxx"
-    topic: "tuya/device1"
+    friendlyname: "device1"
     refresh: 30
     reconnect: 10
     type: luminea_nx_4458
