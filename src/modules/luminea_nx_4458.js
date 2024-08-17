@@ -9,6 +9,8 @@ const DeviceBase = require('../devicebase')
 class Lineplug extends DeviceBase {
 
     init() {
+        this.manufacturer = "Luminea"
+        this.model = "NX-4458"
         this.lastdata = {
             voltage: 0,
             current: 0,
@@ -129,7 +131,7 @@ class Lineplug extends DeviceBase {
             changed = true
         }
         if (updatedValues.includes('17')) {
-            this.lastdata.power = dps['17'] / 100
+            this.lastdata.work = dps['17'] / 100
             changed = true
         }
         if (updatedValues.includes('9')) {

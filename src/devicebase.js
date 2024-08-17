@@ -96,7 +96,7 @@ class DeviceBase {
 
     pushAutodiscover(config){
         if (configldr.config.autodiscover.enabled){
-            autodiscover.publishDevice(this.deviceid,this.friendlyname,config)
+            autodiscover.publishDevice(this,config)
         }
     }
 
@@ -104,7 +104,6 @@ class DeviceBase {
         this.device.find().then(el => {
             if (el) {
                 this.device.connect().catch(el => {
-                    console.log(this.device)
                     this.logger.debug("Reconnect failed: device offline")
                 })
             } else {
