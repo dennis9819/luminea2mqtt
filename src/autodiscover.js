@@ -24,11 +24,18 @@ module.exports.publishDevice = async (device,config) => {
     Object.keys(config).forEach(component =>{
         
         let items = config[component]
-        Object.keys(items).forEach(item =>{
+        Object.keys(items).forEach((item,ix) =>{
             let mqtt_topic = `${configldr.config.autodiscover.topic}/${component}/${device.deviceid}/${item}/config`
             let temp_data = JSON.parse(JSON.stringify(config[component][item]))
             temp_data.unique_id = `${device.deviceid}_${item}_luminea2mqtt`
             temp_data.object_id = `${device.friendlyname}_${item}`
+            if (component == "switch"){
+                if (items.length > 1){
+                    temp_data.name = `${device.friendlyname}_${ix}`
+                }else{
+                    temp_data.name = `${device.friendlyname}`
+                }
+            }
             temp_data.origin = {
                 name : "luminea2mqtt",
                 support_url: "https://github.com/dennis9819/luminea2mqtt"
